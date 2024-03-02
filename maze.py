@@ -6,6 +6,7 @@ import math
 # Constants
 WIDTH, HEIGHT = 800, 600
 WHITE = (255, 255, 255)
+COL = (123,111,100)
 BLACK = (0, 0, 0)
 RED = (255, 0, 0)
 GREY = (169, 169, 169)  # Grey color for roads
@@ -32,8 +33,13 @@ ball_x = 30
 ball_y = 30
 ball_velocity = 5
 
+# Timer variables
+start_time = pygame.time.get_ticks()
+display_time = 5000  # 5 seconds in milliseconds
+
 # Main game loop
 running = True
+display_complete = False
 while running:
     for event in pygame.event.get():
         if event.type == pygame.QUIT:
@@ -60,22 +66,28 @@ while running:
             ball_x = 30
             ball_y = 30
 
+    # Check if display time is over
+    current_time = pygame.time.get_ticks()
+    if current_time - start_time >= display_time:
+        display_complete = True
+
     # Draw background
-    screen.fill(BLACK)
+    screen.fill(BLACK if display_complete else COL)
 
-    # Draw roads
-    for road in roads:
-        pygame.draw.rect(screen, GREY, road)
+    # Draw roads if display time is not over
+    if not display_complete:
+        for road in roads:
+            pygame.draw.rect(screen, GREY, road)
 
-    # Draw starting and ending points
-    pygame.draw.rect(screen, RED, (10, 10, 100, 50))
-    font = pygame.font.SysFont(None, 32)
-    start_text = font.render("Start", True, WHITE)
-    screen.blit(start_text, (20, 20))
+        # Draw starting and ending points
+        pygame.draw.rect(screen, RED, (10, 10, 100, 50))
+        font = pygame.font.SysFont(None, 32)
+        start_text = font.render("Start", True, WHITE)
+        screen.blit(start_text, (20, 20))
 
-    pygame.draw.rect(screen, RED, (WIDTH - 110, HEIGHT - 60, 100, 50))
-    end_text = font.render("End", True, WHITE)
-    screen.blit(end_text, (WIDTH - 100, HEIGHT - 50))
+        pygame.draw.rect(screen, RED, (WIDTH - 110, HEIGHT - 60, 100, 50))
+        end_text = font.render("End", True, WHITE)
+        screen.blit(end_text, (WIDTH - 100, HEIGHT - 50))
 
     # Draw ball
     pygame.draw.circle(screen, WHITE, (ball_x, ball_y), BALL_RADIUS)
