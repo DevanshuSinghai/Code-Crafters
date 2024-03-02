@@ -8,21 +8,18 @@ COL = (123, 111, 100)
 BLACK = (0, 0, 0)
 RED = (255, 0, 0)
 GREY = (169, 169, 169)  # Grey color for roads
-BALL_RADIUS = 10
-FPS = 60
-
-# Assuming you have loaded the hero image
-hero_image = pygame.image.load("hero.png")
-# Load wall image
-wall_image = pygame.image.load("wall.png")
 BALL_RADIUS = 15
-HERO_SIZE = (30, 30)  # Adjust the size of the hero image
+FPS = 60
 
 # Initialize Pygame
 pygame.init()
 screen = pygame.display.set_mode((WIDTH, HEIGHT))
 pygame.display.set_caption("Map with Roads and Ball")
 clock = pygame.time.Clock()
+
+# Load hero image
+hero_image = pygame.image.load("hero.png")
+HERO_SIZE = (30, 30)  # Adjust the size of the hero image
 
 # Define road areas (x, y, width, height)
 original_roads = [
@@ -62,13 +59,13 @@ while running:
 
     # Move the ball only when the screen turns black and the player is not out
     if display_complete and not player_out:
-        if keys[pygame.K_RIGHT]:
+        if keys[pygame.K_RIGHT] and ball_x + BALL_RADIUS + ball_velocity < WIDTH:
             ball_x += ball_velocity
-        elif keys[pygame.K_LEFT]:
+        elif keys[pygame.K_LEFT] and ball_x - BALL_RADIUS - ball_velocity > 0:
             ball_x -= ball_velocity
-        elif keys[pygame.K_DOWN]:
+        elif keys[pygame.K_DOWN] and ball_y + BALL_RADIUS + ball_velocity < HEIGHT:
             ball_y += ball_velocity
-        elif keys[pygame.K_UP]:
+        elif keys[pygame.K_UP] and ball_y - BALL_RADIUS - ball_velocity > 0:
             ball_y -= ball_velocity
 
     # Check if the ball touches any road
@@ -84,7 +81,6 @@ while running:
 
     # Draw roads if display time is not over
     if not display_complete:
-
         for road in original_roads:
             pygame.draw.rect(screen, GREY, road)
 
@@ -98,16 +94,12 @@ while running:
         end_text = font.render("End", True, WHITE)
         screen.blit(end_text, (WIDTH - 100, HEIGHT - 50))
 
-
-    
-
-
     # Draw ball if the player is not out
     if not player_out:
-        pygame.draw.circle(screen, WHITE, (ball_x, ball_y), BALL_RADIUS)
-            # Draw the hero image at the ball's position with the adjusted size
+        # Draw the hero image at the ball's position with the adjusted size
         hero_resized = pygame.transform.scale(hero_image, HERO_SIZE)
-        screen.blit(hero_resized, (ball_x - BALL_RADIUS, ball_y - BALL_RADIUS))
+        hero_rect = hero_resized.get_rect(center=(ball_x, ball_y))
+        screen.blit(hero_resized, hero_rect)
 
     # Display "Player is out" if the player hits a grey road
     if player_out:
@@ -117,8 +109,7 @@ while running:
         ball_x = 30
         ball_y = 30
         restart_text = font_out.render("Press R to restart", True, WHITE)
-
-
+        
         screen.blit(restart_text, (WIDTH // 2 - 200, HEIGHT // 2 + 50))
 
         # Check for restart option
@@ -126,7 +117,6 @@ while running:
             player_out = False
             start_time = pygame.time.get_ticks()
             display_complete = False
-
 
     pygame.display.flip()
     clock.tick(FPS)
