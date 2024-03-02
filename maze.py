@@ -11,6 +11,13 @@ GREY = (169, 169, 169)  # Grey color for roads
 BALL_RADIUS = 10
 FPS = 60
 
+# Assuming you have loaded the hero image
+hero_image = pygame.image.load("hero.png")
+# Load wall image
+wall_image = pygame.image.load("wall.png")
+BALL_RADIUS = 15
+HERO_SIZE = (30, 30)  # Adjust the size of the hero image
+
 # Initialize Pygame
 pygame.init()
 screen = pygame.display.set_mode((WIDTH, HEIGHT))
@@ -77,6 +84,7 @@ while running:
 
     # Draw roads if display time is not over
     if not display_complete:
+
         for road in original_roads:
             pygame.draw.rect(screen, GREY, road)
 
@@ -90,9 +98,16 @@ while running:
         end_text = font.render("End", True, WHITE)
         screen.blit(end_text, (WIDTH - 100, HEIGHT - 50))
 
+
+    
+
+
     # Draw ball if the player is not out
     if not player_out:
         pygame.draw.circle(screen, WHITE, (ball_x, ball_y), BALL_RADIUS)
+            # Draw the hero image at the ball's position with the adjusted size
+        hero_resized = pygame.transform.scale(hero_image, HERO_SIZE)
+        screen.blit(hero_resized, (ball_x - BALL_RADIUS, ball_y - BALL_RADIUS))
 
     # Display "Player is out" if the player hits a grey road
     if player_out:
