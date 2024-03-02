@@ -13,6 +13,13 @@ GREY = (169, 169, 169)  # Grey color for roads
 BALL_RADIUS = 10
 FPS = 60
 
+# Assuming you have loaded the hero image
+hero_image = pygame.image.load("hero.png")
+# Load wall image
+wall_image = pygame.image.load("wall.png")
+BALL_RADIUS = 15
+HERO_SIZE = (30, 30)  # Adjust the size of the hero image
+
 # Initialize Pygame
 pygame.init()
 screen = pygame.display.set_mode((WIDTH, HEIGHT))
@@ -77,7 +84,17 @@ while running:
     # Draw roads if display time is not over
     if not display_complete:
         for road in roads:
-            pygame.draw.rect(screen, GREY, road)
+            pygame.draw.rect(screen, GREY, road)  # Draw a rectangle for the road
+
+        # Calculate the number of wall images vertically and horizontally
+            num_walls_horizontal = road[2] // 50
+            num_walls_vertical = road[3] // 50
+
+        # Blit the resized wall images onto the rectangles
+            for i in range(num_walls_horizontal):
+                for j in range(num_walls_vertical):
+                    wall_rect = pygame.Rect(road[0] + i * 50, road[1] + j * 50, 1, 1)
+                    screen.blit(wall_image, wall_rect.topleft)
 
         # Draw starting and ending points
         pygame.draw.rect(screen, RED, (10, 10, 100, 50))
@@ -90,7 +107,12 @@ while running:
         screen.blit(end_text, (WIDTH - 100, HEIGHT - 50))
 
     # Draw ball
-    pygame.draw.circle(screen, WHITE, (ball_x, ball_y), BALL_RADIUS)
+    #pygame.draw.circle(screen, WHITE, (ball_x, ball_y), BALL_RADIUS)
+
+    
+    # Draw the hero image at the ball's position with the adjusted size
+    hero_resized = pygame.transform.scale(hero_image, HERO_SIZE)
+    screen.blit(hero_resized, (ball_x - BALL_RADIUS, ball_y - BALL_RADIUS))
 
     pygame.display.flip()
     clock.tick(FPS)
