@@ -1,0 +1,2 @@
+# Code-Crafters
+hash hacks
