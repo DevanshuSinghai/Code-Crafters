@@ -113,11 +113,15 @@ while running:
             running = False
 
     keys = pygame.key.get_pressed()
+    level_time=15*1000
 
     # Check if display time is over
     current_time = pygame.time.get_ticks()
     if current_time - start_time >= display_time:
         display_complete = True
+        
+    if current_time - start_time >= level_time:
+        player_out=True
 
     # Move the ball only when the screen turns black, the player is not out, and the end is not reached
     if display_complete and not player_out and not end_reached:
@@ -160,6 +164,16 @@ while running:
     pygame.draw.rect(screen, RED, end_boxes[current_level])
     end_text = font.render("End", True, WHITE)
     screen.blit(end_text, (WIDTH - 100, HEIGHT - 50))
+
+    pygame.draw.rect(screen, RED, (1,10,100,50))
+    end_text = font.render(str("Level "+str(current_level+1)), True, WHITE)
+    screen.blit(end_text, (WIDTH - 100,50))
+
+    
+    if not level_completed or not player_out:
+        pygame.draw.rect(screen, RED, (1,10,100,50))
+        end_text = font.render(str("Time Left "+str((current_time-start_time)/1000)), True, WHITE)
+        screen.blit(end_text, (WIDTH - 300,50))
 
     # Draw ball if the player is not out
     if not player_out:
