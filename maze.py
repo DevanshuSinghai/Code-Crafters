@@ -1,5 +1,6 @@
 import pygame
 import sys
+import time
 
 # Constants
 WIDTH, HEIGHT = 800, 600
@@ -10,6 +11,10 @@ RED = (255, 0, 0)
 GREY = (169, 169, 169)  # Grey color for roads
 BALL_RADIUS = 15
 FPS = 60
+win=False
+image_path = "logo.jpg"  # Replace with the path to your image
+background_image = pygame.image.load(image_path)
+start_logo = pygame.transform.scale(background_image, (WIDTH, HEIGHT))
 
 # Initialize Pygame
 pygame.init()
@@ -80,7 +85,7 @@ levels = [
     ],
     # Add other levels here
 ]
-
+print(len(levels))
 # End box position for each level
 end_boxes = [
     pygame.Rect(WIDTH - 110, HEIGHT - 60, 100, 50)
@@ -94,7 +99,7 @@ ball_velocity = 5
 
 # Timer variables
 start_time = pygame.time.get_ticks()
-display_time = 500  # 5 seconds in milliseconds
+display_time = 5000  # 5 seconds in milliseconds
 
 # Player status
 player_out = False
@@ -103,17 +108,36 @@ end_reached = False  # New variable to track end reached state
 
 # Level index
 current_level = 0
-
+start=True
 # Main game loop
 running = True
 display_complete = False
+tries=1
 while running:
+    font = pygame.font.SysFont(None, 32)
     for event in pygame.event.get():
         if event.type == pygame.QUIT:
             running = False
 
+
+
     keys = pygame.key.get_pressed()
     level_time=15*1000
+    if start and current_level==0:
+        screen.blit(start_logo, (0, 0))
+        font_out = pygame.font.SysFont(None, 64)
+        out_text = font_out.render("Hold Space to start", True, WHITE)
+        screen.blit(out_text, (WIDTH // 2 - 200, HEIGHT // 2))
+        pygame.display.flip()
+        time.sleep(1)
+        screen.blit(start_logo, (0, 0))
+        out_text = font_out.render("", True, WHITE)
+        pygame.display.flip()
+        time.sleep(.5)
+        if keys[pygame.K_SPACE] :
+            start=False
+            start_time = pygame.time.get_ticks()
+            display_complete = False
 
     # Check if display time is over
     current_time = pygame.time.get_ticks()
@@ -124,7 +148,7 @@ while running:
         player_out=True
 
     # Move the ball only when the screen turns black, the player is not out, and the end is not reached
-    if display_complete and not player_out and not end_reached:
+    if display_complete and not player_out and not end_reached and not start:
         if keys[pygame.K_RIGHT] and ball_x + BALL_RADIUS + ball_velocity < WIDTH:
             ball_x += ball_velocity
         elif keys[pygame.K_LEFT] and ball_x - BALL_RADIUS - ball_velocity > 0:
@@ -148,42 +172,49 @@ while running:
             player_out = True
 
     # Draw background
-    screen.fill(BLACK if display_complete else COL)
+    if not start:
+        screen.fill(BLACK if display_complete else COL)
 
     # Draw roads if display time is not over
-    if not display_complete:
+    if not display_complete and not start:
         for road in levels[current_level]:
             pygame.draw.rect(screen, GREY, road)
 
     # Draw starting and ending points
-    pygame.draw.rect(screen, RED, (10, 10, 100, 50))
-    font = pygame.font.SysFont(None, 32)
-    start_text = font.render("Start", True, WHITE)
-    screen.blit(start_text, (20, 20))
+    if not start and not win:
+        pygame.draw.rect(screen, RED, (10, 10, 100, 50))
+        font = pygame.font.SysFont(None, 32)
+        start_text = font.render("Start", True, WHITE)
+        screen.blit(start_text, (20, 20))
 
-    pygame.draw.rect(screen, RED, end_boxes[current_level])
-    end_text = font.render("End", True, WHITE)
-    screen.blit(end_text, (WIDTH - 100, HEIGHT - 50))
+        pygame.draw.rect(screen, RED, end_boxes[current_level])
+        end_text = font.render("End", True, WHITE)
+        screen.blit(end_text, (WIDTH - 100, HEIGHT - 50))
 
-    pygame.draw.rect(screen, RED, (1,10,100,50))
-    end_text = font.render(str("Level "+str(current_level+1)), True, WHITE)
-    screen.blit(end_text, (WIDTH - 100,50))
+        pygame.draw.rect(screen, RED, (1,10,100,50))
+        end_text = font.render(str("Level "+str(current_level+1)), True, WHITE)
+        screen.blit(end_text, (WIDTH - 300,50))
 
     
-    if not level_completed or not player_out:
-        pygame.draw.rect(screen, RED, (1,10,100,50))
-        end_text = font.render(str("Time Left "+str((current_time-start_time)/1000)), True, WHITE)
-        screen.blit(end_text, (WIDTH - 300,50))
+        if not level_completed or not player_out and not win:
+            pygame.draw.rect(screen, RED, (1,10,100,50))
+            if current_time-start_time-display_time<0:
+                end_text = font.render(str("Level starts in "+str(-(current_time-start_time-display_time)/1000)), True, WHITE)
+            else:
+                end_text = font.render(str("Time Left "+str((current_time-start_time-display_time)/1000)), True, WHITE)
+            screen.blit(end_text, (WIDTH - 300,20))
 
     # Draw ball if the player is not out
     if not player_out:
         # Draw the hero image at the ball's position with the adjusted size
         hero_resized = pygame.transform.scale(hero_image, HERO_SIZE)
         hero_rect = hero_resized.get_rect(center=(ball_x, ball_y))
-        screen.blit(hero_resized, hero_rect)
+        if not start:
+            screen.blit(hero_resized, hero_rect)
 
     # Display "Player is out" if the player hits a grey road
     if player_out:
+        tries+=1
         font_out = pygame.font.SysFont(None, 64)
         out_text = font_out.render("Player is out", True, WHITE)
         screen.blit(out_text, (WIDTH // 2 - 200, HEIGHT // 2))
@@ -201,11 +232,18 @@ while running:
 
     # Display "Level Completed" if the ball reaches the end box
     if level_completed:
-        font_level = pygame.font.SysFont(None, 64)
-        level_text = font_level.render("Level Completed", True, WHITE)
-        screen.blit(level_text, (WIDTH // 2 - 200, HEIGHT // 2))
-        next_level_text = font_level.render("Press N for next level", True, WHITE)
-        screen.blit(next_level_text, (WIDTH // 2 - 250, HEIGHT // 2 + 50))
+        if current_level==len(levels)-2:
+            win=True
+            while True:
+                font_level = pygame.font.SysFont(None, 64)
+                level_text = font_level.render("You won!!!!!!!!", True, WHITE)
+                screen.blit(level_text, (WIDTH // 2 - 200, HEIGHT // 2))
+        else:
+            font_level = pygame.font.SysFont(None, 64)
+            level_text = font_level.render("Level Completed", True, WHITE)
+            screen.blit(level_text, (WIDTH // 2 - 200, HEIGHT // 2))
+            next_level_text = font_level.render("Press N for next level", True, WHITE)
+            screen.blit(next_level_text, (WIDTH // 2 - 250, HEIGHT // 2 + 50))
 
         # Check for next level option
         if keys[pygame.K_n]:
@@ -216,8 +254,8 @@ while running:
             start_time = pygame.time.get_ticks()
             display_complete = False
             end_reached=False
-            current_level = (current_level + 1) % len(levels)
-
+            current_level = (current_level + 1)%len(levels)
+                
     pygame.display.flip()
     clock.tick(FPS)
 
