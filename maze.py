@@ -201,7 +201,7 @@ while running:
             if current_time-start_time-display_time<0:
                 end_text = font.render(str("Level starts in "+str(-(current_time-start_time-display_time)/1000)), True, WHITE)
             else:
-                end_text = font.render(str("Time Left "+str((current_time-start_time-display_time)/1000)), True, WHITE)
+                end_text = font.render(str("Time left "+str(10-(current_time-start_time-display_time)/1000)), True, WHITE)
             screen.blit(end_text, (WIDTH - 300,20))
 
     # Draw ball if the player is not out
