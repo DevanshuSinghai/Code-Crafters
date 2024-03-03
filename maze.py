@@ -11,7 +11,7 @@ RED = (255, 0, 0)
 GREY = (169, 169, 169)  # Grey color for roads
 BALL_RADIUS = 15
 FPS = 60
-
+win=False
 image_path = "logo.jpg"  # Replace with the path to your image
 background_image = pygame.image.load(image_path)
 start_logo = pygame.transform.scale(background_image, (WIDTH, HEIGHT))
@@ -85,7 +85,7 @@ levels = [
     ],
     # Add other levels here
 ]
-
+print(len(levels))
 # End box position for each level
 end_boxes = [
     pygame.Rect(WIDTH - 110, HEIGHT - 60, 100, 50)
@@ -99,7 +99,7 @@ ball_velocity = 5
 
 # Timer variables
 start_time = pygame.time.get_ticks()
-display_time = 500  # 5 seconds in milliseconds
+display_time = 5000  # 5 seconds in milliseconds
 
 # Player status
 player_out = False
@@ -112,6 +112,7 @@ start=True
 # Main game loop
 running = True
 display_complete = False
+tries=1
 while running:
     font = pygame.font.SysFont(None, 32)
     for event in pygame.event.get():
@@ -122,7 +123,7 @@ while running:
 
     keys = pygame.key.get_pressed()
     level_time=15*1000
-    if start:
+    if start and current_level==0:
         screen.blit(start_logo, (0, 0))
         font_out = pygame.font.SysFont(None, 64)
         out_text = font_out.render("Hold Space to start", True, WHITE)
@@ -180,7 +181,7 @@ while running:
             pygame.draw.rect(screen, GREY, road)
 
     # Draw starting and ending points
-    if not start:
+    if not start and not win:
         pygame.draw.rect(screen, RED, (10, 10, 100, 50))
         font = pygame.font.SysFont(None, 32)
         start_text = font.render("Start", True, WHITE)
@@ -192,13 +193,16 @@ while running:
 
         pygame.draw.rect(screen, RED, (1,10,100,50))
         end_text = font.render(str("Level "+str(current_level+1)), True, WHITE)
-        screen.blit(end_text, (WIDTH - 100,50))
+        screen.blit(end_text, (WIDTH - 300,50))
 
     
-        if not level_completed or not player_out:
+        if not level_completed or not player_out and not win:
             pygame.draw.rect(screen, RED, (1,10,100,50))
-            end_text = font.render(str("Time Left "+str((current_time-start_time)/1000)), True, WHITE)
-            screen.blit(end_text, (WIDTH - 300,50))
+            if current_time-start_time-display_time<0:
+                end_text = font.render(str("Level starts in "+str(-(current_time-start_time-display_time)/1000)), True, WHITE)
+            else:
+                end_text = font.render(str("Time Left "+str((current_time-start_time-display_time)/1000)), True, WHITE)
+            screen.blit(end_text, (WIDTH - 300,20))
 
     # Draw ball if the player is not out
     if not player_out:
@@ -210,6 +214,7 @@ while running:
 
     # Display "Player is out" if the player hits a grey road
     if player_out:
+        tries+=1
         font_out = pygame.font.SysFont(None, 64)
         out_text = font_out.render("Player is out", True, WHITE)
         screen.blit(out_text, (WIDTH // 2 - 200, HEIGHT // 2))
@@ -227,11 +232,18 @@ while running:
 
     # Display "Level Completed" if the ball reaches the end box
     if level_completed:
-        font_level = pygame.font.SysFont(None, 64)
-        level_text = font_level.render("Level Completed", True, WHITE)
-        screen.blit(level_text, (WIDTH // 2 - 200, HEIGHT // 2))
-        next_level_text = font_level.render("Press N for next level", True, WHITE)
-        screen.blit(next_level_text, (WIDTH // 2 - 250, HEIGHT // 2 + 50))
+        if current_level==len(levels)-2:
+            win=True
+            while True:
+                font_level = pygame.font.SysFont(None, 64)
+                level_text = font_level.render("You won!!!!!!!!", True, WHITE)
+                screen.blit(level_text, (WIDTH // 2 - 200, HEIGHT // 2))
+        else:
+            font_level = pygame.font.SysFont(None, 64)
+            level_text = font_level.render("Level Completed", True, WHITE)
+            screen.blit(level_text, (WIDTH // 2 - 200, HEIGHT // 2))
+            next_level_text = font_level.render("Press N for next level", True, WHITE)
+            screen.blit(next_level_text, (WIDTH // 2 - 250, HEIGHT // 2 + 50))
 
         # Check for next level option
         if keys[pygame.K_n]:
@@ -242,8 +254,8 @@ while running:
             start_time = pygame.time.get_ticks()
             display_complete = False
             end_reached=False
-            current_level = (current_level + 1) % len(levels)
-
+            current_level = (current_level + 1)%len(levels)
+                
     pygame.display.flip()
     clock.tick(FPS)
 
