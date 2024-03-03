@@ -30,14 +30,62 @@ levels = [
         (50, 350, 200, 30),
         (400, 50, 30, 200)
     ],
+    [
+        (10, 600, 60, 40),
+        (100, 300, 420, 40),
+        (350, 30, 20, 40),
+        (510, 30, 100, 30),
+        (0, 500, 300, 120)
+    ],
+    [
+        (350, 20, 100, 40),
+        (300, 50, 400, 40),
+        (550, 30, 100, 400),
+        (510, 350, 245, 130),
+        (40, 350, 300, 20),
+        (100, 30, 100, 30),
+        (0, 100, 30, 10)
+    ],
+    [
+        (101, 20, 16, 410),
+        (210, 330, 20, 240),
+        (333, 333, 210, 430),
+        (10, 50, 10, 300),
+        (190, 0, 30, 20),
+        (333, 0, 210, 270)
+    ],
+    [
+        (121, 60, 10, 40),
+        (20, 373, 220, 40),
+        (383, 33, 20, 40),
+        (70, 550, 100, 30),
+        (10, 100, 30, 20),
+        (3, 220, 20, 70),
+        (421, 60, 10, 40),
+        (320, 373, 220, 40),
+        (683, 33, 20, 40),
+        (370, 550, 100, 30),
+        (310, 100, 30, 20),
+        (53, 220, 20, 70),
+        (333, 520, 20, 70),
+        (421, 560, 10, 40),
+        (320, 773, 220, 40),
+        (383, 333, 200, 400),
+        (170, 50, 100, 300),
+        (210, 200, 300, 200),
+        (761, 460, 40, 100),
+        (620, 573, 100, 40),
+        (730, 350, 400, 400),
+        (620,500,60,60)
+    ],
     # Add other levels here
 ]
 
 # End box position for each level
 end_boxes = [
-    pygame.Rect(WIDTH - 110, HEIGHT - 60, 100, 50),
+    pygame.Rect(WIDTH - 110, HEIGHT - 60, 100, 50)
     # Add end box positions for other levels here
-]
+]*len(levels)
 
 # Ball position and velocity
 ball_x = 30
@@ -46,7 +94,7 @@ ball_velocity = 5
 
 # Timer variables
 start_time = pygame.time.get_ticks()
-display_time = 5000  # 5 seconds in milliseconds
+display_time = 500  # 5 seconds in milliseconds
 
 # Player status
 player_out = False
@@ -147,12 +195,13 @@ while running:
 
         # Check for next level option
         if keys[pygame.K_n]:
-            player_out = False
-            level_completed = False
             ball_x = 30
             ball_y = 30
+            player_out = False
+            level_completed = False
             start_time = pygame.time.get_ticks()
             display_complete = False
+            end_reached=False
             current_level = (current_level + 1) % len(levels)
 
     pygame.display.flip()
